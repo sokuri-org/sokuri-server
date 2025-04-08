@@ -1,0 +1,6 @@
+ruff
+numpy
+pyyaml
+pre-commit
+ultralytics
+opencv-python
