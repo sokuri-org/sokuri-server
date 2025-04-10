@@ -1,3 +1,13 @@
-.env
+__pycache__/
+*.py[cod]
+
 .venv/
+.env
+.dist/
 .ruff_cache/
+
+data/
+temp/
+sfm_inputs/
+
+yolov8n.pt
