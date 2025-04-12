@@ -1,19 +1,20 @@
-from ultralytics import YOLO
 import os
 import cv2
-from estimators.size_estimator import estimate_bag_size
+from ultralytics import YOLO
+from sokuri.yolo.estimator import estimate_bag_size
 
-model = YOLO("yolov8n.pt")
+MODEL_PATH = "sokuri/yolo/models/yolov8n.pt"
+model = YOLO(MODEL_PATH)
 
 BAG_LABELS = {"bag", "backpack", "handbag", "suitcase"}
 
-def is_bag(label):
+def is_bag(label: str) -> bool:
     return label.lower() in BAG_LABELS
 
-def normalize_label(label):
+def normalize_label(label: str) -> str:
     return "bag" if is_bag(label) else label.lower()
 
-def detect_and_estimate(image_path, scale_cm_per_px=None, save_dir=None):
+def detect_and_estimate(image_path: str, scale_cm_per_px=None, save_dir=None) -> dict:
     results = model(image_path)
     img = cv2.imread(image_path)
     filename = os.path.basename(image_path)
@@ -40,9 +41,11 @@ def detect_and_estimate(image_path, scale_cm_per_px=None, save_dir=None):
             if save_dir:
                 os.makedirs(save_dir, exist_ok=True)
                 cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                text = f"{norm_label} ({round(conf,2)})"
-                cv2.putText(img, text, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 4)
-                cv2.putText(img, text, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
+                text = f"{norm_label} ({round(conf, 2)})"
+                cv2.putText(img, text, (x1, y1 - 10),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 4)
+                cv2.putText(img, text, (x1, y1 - 10),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
 
     if save_dir:
         out_path = os.path.join(save_dir, filename)
@@ -50,7 +53,7 @@ def detect_and_estimate(image_path, scale_cm_per_px=None, save_dir=None):
 
     size_info = estimate_bag_size(
         detections,
-        lambda l: normalize_label(l) == "bag",
+        lambda label: normalize_label(label) == "bag",
         scale_cm_per_px
     )
 
@@ -60,6 +63,7 @@ def detect_and_estimate(image_path, scale_cm_per_px=None, save_dir=None):
         "contains_bag": any(d["normalized_label"] == "bag" for d in detections),
         "contains_reference": scale_cm_per_px is not None,
         "estimated_width_cm": size_info["cm"],
-        "bag_width_px": size_info["px"],
+        "bag_width_px": size_info["width_px"],
+        "bag_height_px": size_info["height_px"],
         "note": size_info["note"]
     }

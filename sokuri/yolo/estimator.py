@@ -1,5 +1,4 @@
-def estimate_bag_size(detections, is_bag_fn):
-
+def estimate_bag_size(detections, is_bag_fn, scale_cm_per_px=None):
     bag_boxes = [d for d in detections if is_bag_fn(d.get("normalized_label"))]
 
     if not bag_boxes:
@@ -26,5 +25,9 @@ def estimate_bag_size(detections, is_bag_fn):
         "cm": None,
         "note": "기준 객체 없음 - 실측 생략"
     }
+
+    if scale_cm_per_px:
+        result["cm"] = round(width_px * scale_cm_per_px, 2)
+        result["note"] = "기준 객체 기반 실측 추정"
 
     return result
