@@ -2,10 +2,24 @@ import json
 import os
 import sys
 
-from yolo.detect import detect_and_estimate
+from fastapi import FastAPI
+
+from sokuri.routers.images import router as images_router
+from sokuri.yolo.detect import detect_and_estimate
 
 DETECTION_JSON_DIR = "data/json/"
 RESULT_IMAGE_DIR = "data/results/"
+
+app = FastAPI(
+    title="Sokuri YOLO API", description="이미지 감지 및 분석을 위한 API 서비스", version="1.0.0"
+)
+
+app.include_router(images_router)
+
+
+@app.get("/", tags=["Health"])
+def read_root():
+    return {"message": "Sokuri YOLO API is alive"}
 
 
 def clear_dir(folder):
@@ -27,22 +41,15 @@ def generate_detection_results(image_folder):
 
         image_path = os.path.join(image_folder, filename)
 
-        result = detect_and_estimate(
-            image_path,
-            scale_cm_per_px=None,
-            save_dir=RESULT_IMAGE_DIR
-        )
+        result = detect_and_estimate(image_path, scale_cm_per_px=None, save_dir=RESULT_IMAGE_DIR)
 
         result["filename"] = filename
         result["valid"] = any(d["normalized_label"] == "bag" for d in result["detections"])
 
         bag_confidences = [
-            d["confidence"] for d in result["detections"]
-            if d["normalized_label"] == "bag"
+            d["confidence"] for d in result["detections"] if d["normalized_label"] == "bag"
         ]
-        result["avg_conf"] = round(
-            sum(bag_confidences) / max(1, len(bag_confidences)), 3
-        )
+        result["avg_conf"] = round(sum(bag_confidences) / max(1, len(bag_confidences)), 3)
 
         json_path = os.path.join(DETECTION_JSON_DIR, f"{filename}.json")
         with open(json_path, "w") as f:
