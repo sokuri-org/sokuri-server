@@ -18,24 +18,32 @@ logger = logging.getLogger("image_service")
 if not logger.hasHandlers():
     logging.basicConfig(level=logging.INFO)
 
-def handle_single_image(url: str, product_id: str) -> dict:
+def handle_review_image(url: str, product_id: str) -> dict:
     unique_id = uuid.uuid4().hex
     filename = f"{product_id}_{unique_id}.jpg"
     image_path = os.path.join(SAVE_DIR, filename)
 
-    logger.info(f"📥 Downloading image from {url}")
-    response = requests.get(url, timeout=5)
-    response.raise_for_status()
+    logger.info(f"📥 이미지 다운로드 {url}")
+    try:
+        response = requests.get(url, timeout=5)
+        response.raise_for_status()
+    except Exception as err:
+        logger.error(f"이미지 다운로드 실패 {url}: {err}")
+        raise
 
     with open(image_path, "wb") as f:
         f.write(response.content)
 
-    logger.info(f"Running YOLO detection for {filename}")
-    result = detect_and_estimate(
-        image_path,
-        scale_cm_per_px=None,
-        save_dir=RESULT_DIR
-    )
+    logger.info(f"YOLO 감지 실행 - 파일명: {filename}")
+    try:
+        result = detect_and_estimate(
+            image_path,
+            scale_cm_per_px=None,
+            save_dir=RESULT_DIR
+        )
+    except Exception as err:
+        logger.error(f"YOLO 감지 실패 - 파일명: {filename}: {err}", exc_info=True)
+        raise
 
     result["filename"] = filename
 
@@ -50,7 +58,7 @@ async def process_images(payload: ImageUploadRequest) -> List[dict]:
 
     for url in payload.image_urls:
         try:
-            result = handle_single_image(url, payload.product_id)
+            result = handle_review_image(url, payload.product_id)
             results.append(result)
 
         except requests.exceptions.RequestException as e:
