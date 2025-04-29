@@ -1,12 +1,15 @@
-from .constants import RotationType, Axis
-from .auxiliary_methods import intersect, set2Decimal
-import numpy as np
-# required to plot a representation of Bin and contained items
-from matplotlib.patches import Rectangle,Circle
+import copy
+
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.art3d as art3d
-from collections import Counter
-import copy
+import numpy as np
+
+# required to plot a representation of Bin and contained items
+from matplotlib.patches import Circle, Rectangle
+
+from .auxiliary_methods import intersect, set2Decimal
+from .constants import Axis, RotationType
+
 DEFAULT_NUMBER_OF_DECIMALS = 0
 START_POSITION = [0, 0, 0]
 
@@ -83,7 +86,6 @@ class Item:
             dimension = []
 
         return dimension
-
 
 
 class Bin:

@@ -1,4 +1,5 @@
 from decimal import Decimal
+
 from .constants import Axis
 
 
