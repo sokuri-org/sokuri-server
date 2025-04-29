@@ -4,6 +4,7 @@ import uuid
 
 import requests
 
+from sokuri.schemas.image_schema import ImageUploadRequest
 from sokuri.utils.bag_average_size import CATEGORY_AVERAGE_SIZES
 from sokuri.yolo.detect import detect_and_estimate
 
@@ -65,12 +66,12 @@ def handle_review_image(url: str, product_id: str, category: str) -> dict[str, f
         "filename": os.path.basename(image_path)
     }
 
-def process_images(image_urls: list, product_id: str, category: str) -> list[dict]:
+def process_images(payload: ImageUploadRequest) -> list[dict]:
     results = []
 
-    for url in image_urls:
+    for url in payload.image_urls:
         try:
-            result = handle_review_image(url, product_id, category)
+            result = handle_review_image(url, payload.product_id, payload.category)
             results.append(result)
 
         except requests.exceptions.Timeout as err:
