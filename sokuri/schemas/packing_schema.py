@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Tuple
+
 
 class ReqItem(BaseModel):
     itemName: str
@@ -13,24 +13,24 @@ class ReqItem(BaseModel):
     loadBear: int
 
 class PackingRequest(BaseModel):
-    bag: List[int]
-    items: List[ReqItem]
+    bag: list[int]
+    items: list[ReqItem]
 
 class Req(BaseModel):
-    items: List[ReqItem]
+    items: list[ReqItem]
 
 class ResItem(BaseModel):
     itemName: str
     itemIndex: int
-    itemScale: List[float]
-    position: List[float]
+    itemScale: list[float]
+    position: list[float]
     rotationType: int
 
 
 class result(BaseModel):
-    boxSize: Tuple[str, Tuple[int, int, int]]
-    itemList: List[ResItem]
+    boxSize: tuple[str, tuple[int, int, int]]
+    itemList: list[ResItem]
 
 
 class Res(BaseModel):
-    result: List[result]
+    result: list[result]
