@@ -10,7 +10,7 @@ from sokuri.services.estimate_service import process_images
 
 load_dotenv()
 
-router = APIRouter(prefix="/bags/sizes", tags=["sizes"])
+router = APIRouter(prefix="/bags/images", tags=["images"])
 
 CRAWLER_API_URL = os.getenv("CRAWLER_API_URL")
 
